@@ -1,126 +1,94 @@
-# poe-gpt-api poe-gpt-api
-A converter that can convert the API Token provided by POE into the API format of OpenAI, allowing other applications dependent on the **OpenAI API** to use POE's API.
+## poe-to-gpt
+A converter that transforms POE's API token into OpenAI's API format, enabling other applications that depend on OpenAI API to use POE's API.
 
-This is a tool that converts the API key provided by Poe (Poe.com) official website into a compatible OpenAI API key. It enables Poe API key to be used with tools that depend on OpenAI API key. The main reason for developing this tool is to provide convenience and stability for users in mainland China who find it inconvenient to subscribe to and recharge OpenAI API. 
+This tool converts API keys provided by the Poe official website into compatible OpenAI API keys. It allows Poe API keys to be used with tools that rely on OpenAI API keys. The main reason for developing this tool is to provide convenience and stability for users in mainland China, who find it inconvenient to subscribe to and recharge OpenAI API.
 
-Referenced the project at [https://github.com/juzeon/poe-openai-proxy](https://github.com/juzeon/poe-openai-proxy)
+Please note that **API keys are currently only available to Poe subscribers**.
 
-Note that access to an API key is currently limited to Poe subscribers to minimize abuse.
+Poe subscribers can get their API key at: [https://poe.com/api_key](https://poe.com/api_key)
 
-The location to obtain the API key:[https://poe.com/api_key](https://poe.com/api_key)
+**The new version simplifies the procedures and deployment methods.**
 
-[中文文档](https://github.com/formzs/poe-to-gpt/blob/master/README_zh.md)
+[中文文档](https://github.com/formzs/poe-to-gpt/blob/main/README.md)
 
-## Installation
+#### Installation
 
 Clone this repository to your local machine:
 
 ```
 git clone https://github.com/formzs/poe-to-gpt.git
-cd poe-gpt-api/
+cd poe-to-gpt/
 ```
 
 Install dependencies from requirements.txt:
 
 ```
-pip install -r external/requirements.txt
+pip install -r requirements.txt
 ```
 
-Create the configuration file in the root folder of the project. Instructions are written in the comments:
+Create a configuration file in the project's root directory. Instructions are in the comments:
 
 ```
-cp config.example.toml config.toml
-vim config.toml
+cp .env.example .env
+vim .env
 ```
 
-Start the Python backend for `poe-api`:
+Start the project:
 
 ```
-python external/api.py # Running on port 5100
+# Runs on port 3700 by default
+python app.py
 ```
 
-Build and start the Go backend:
-
+#### Docker (Recommended)
+##### Method 1: Use the pre-built Docker image from this repository
 ```
-go build
-chmod +x poe-openai-proxy
-./poe-openai-proxy
+# Download the .env.example and docker-compose.yml files to the specified directory, for example: /usr/local/poe-to-gpt
+mkdir /usr/local/poe-to-gpt
+cd /usr/local/poe-to-gpt
+wget https://raw.githubusercontent.com/formzs/poe-to-gpt/refs/heads/main/docker-compose.yml
+wget https://raw.githubusercontent.com/formzs/poe-to-gpt/refs/heads/main/.env.example
+# Copy and modify the configuration file
+cp .env.example .env
+vim .env
+# Start the container, running by default on port 3700
+docker-compose up -d
+```
+##### Method 2: Build the Docker image yourself
+```
+git clone https://github.com/formzs/poe-to-gpt.git
+cd poe-to-gpt/
+# Copy and modify the configuration file
+cp .env.example .env
+vim .env
+# Build and start, running by default on port 3700
+docker compose -f docker-compose-build.yml up -d --build
 ```
 
-### Docker support
+### Usage
 
-If you would like to use docker, just run `docker-compose up -d` after creating `config.toml` according to the instructions above.
+Please refer to [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create) for more details on how to use the ChatGPT API.
 
-## Usage
-
-See [OpenAI Document](https://platform.openai.com/docs/api-reference/chat/create) for more details on how to use the ChatGPT API.
-
-Just replace `https://api.openai.com` in your code with `http://localhost:3700` and you're good to go.
-> Be sure to enter the custom API key(The corresponding field in `config.toml` is `accessTokens`)
+Simply replace `https://api.openai.com` with `http://localhost:3700` in your code to start using it.
+> Note: Make sure to input your custom API key (corresponding to the `ACCESS_TOKENS` field in `.env`)
 
 Supported routes:
-
-- /models
 - /chat/completions
-- /v1/models
 - /v1/chat/completions
+- /models
+- /v1/models
 
-Supported parameters:
+## Supported Model Parameters (The bot name on the POE marketplace can be changed by modifying the .env environment variable file)
+- GPT-4o
+- GPT-4o-Mini
+- GPT-3.5-Turbo
+- Claude-3.5-Sonnet
+- Claude-3-opus
+- Gemini-2.0-Pro
+- DeepSeek-R1
+- Deepseek-v3-T
+- DALL-E-3
 
-| Parameter | Note                                                         |
-| --------- | ------------------------------------------------------------ |
-| model     | See `[bot]` section of `config.example.toml`. Model names are mapped to bot nicknames. |
-| messages  | You can use this as in the official API, except for `name`.  |
-| stream    | You can use this as in the official API.                     |
-
-Other parameters will be ignored.
-
-**Successfully tested in the Chatbox and Lobe-chat.**
-
-## The bot name map to use from poe.
-"gpt-3.5-turbo-16k" = "ChatGPT-16k"
-
-"gpt-3.5-turbo" = "ChatGPT-16k"
-
-"gpt-4" = "GPT-4"
-
-"gpt-4o" = "GPT-4o"
-
-"gpt-4o-mini" = "GPT-4o-Mini"
-
-"gpt-4-vision-preview" = "GPT-4-128k"
-
-"gpt-4-turbo-preview" = "Claude-3-Opus"
-
-"Llama-3.1-405B-T" = "Llama-3.1-405B-T"
-
-"Llama-3.1-405B-FW-128k" = "Llama-3.1-405B-FW-128k"
-
-"Llama-3.1-70B-T" = "Llama-3.1-70B-T"
-
-"Llama-3.1-70B-FW-128k" = "Llama-3.1-70B-FW-128k"
-
-"Claude-3.5-Sonnet" = "Claude-3.5-Sonnet"
-
-"Claude-3-Sonnet" = "Claude-3-Sonnet"
-
-"Claude-3-Haiku" = "Claude-3-Haiku"
-
-"Llama-3-70b-Groq" = "Llama-3-70b-Groq"
-
-"Gemini-1.5-Pro"="Gemini-1.5-Pro"
-
-"Gemini-1.5-Pro-128k"="Gemini-1.5-Pro-128k"
-
-"Gemini-1.5-Pro-1M"="Gemini-1.5-Pro-1M"
-
-"DALL-E-3"="DALL-E-3"
-
-"StableDiffusionXL"="StableDiffusionXL"
-
-## Credit
+## Acknowledgments
 - https://github.com/juzeon/poe-openai-proxy
 - https://developer.poe.com/server-bots/accessing-other-bots-on-poe
-
-
-

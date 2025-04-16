@@ -1,2 +1,14 @@
-.qodo
+config.toml
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
 *.log
+.idea/
+.vscode/
+dist/
+build/
+*.egg-info/
