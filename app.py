@@ -27,6 +27,10 @@ PORT = int(os.getenv("PORT", 3700))
 TIMEOUT = int(os.getenv("TIMEOUT", 120))
 PROXY = os.getenv("PROXY", "")
 
+# 设置日志
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # 解析JSON数组格式的环境变量
 def parse_json_env(env_name, default=None):
     value = os.getenv(env_name)
@@ -47,10 +51,6 @@ def parse_json_env(env_name, default=None):
 ACCESS_TOKENS = set(parse_json_env("ACCESS_TOKENS"))
 BOT_NAMES = parse_json_env("BOT_NAMES")
 POE_API_KEYS = parse_json_env("POE_API_KEYS")
-
-# 设置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 # 初始化代理
 proxy = None
@@ -105,7 +105,7 @@ async def add_token(token: str):
         try:
             logger.info(f"Attempting to add apikey: {token[:6]}...")  # 只记录前6位
             request = CompletionRequest(
-                model="GPT-3.5-Turbo",
+                model="GPT-4o-mini",
                 messages=[Message(role="user", content="Please return 'OK'")],
                 temperature=0.7
             )
@@ -364,14 +364,36 @@ app.include_router(router)
 async def main(tokens: List[str] = None):
     try:
         await initialize_tokens(tokens)
-        conf = uvicorn.Config(
+        ssl_keyfile = './server.key'
+        ssl_certfile = './server.crt'
+        
+        # HTTP server config
+        http_conf = uvicorn.Config(
             app,
             host="0.0.0.0",
             port=PORT,
             log_level="info"
         )
-        server = uvicorn.Server(conf)
-        await server.serve()
+        
+        # HTTPS server config
+        https_conf = uvicorn.Config(
+            app,
+            host="0.0.0.0",
+            port=PORT + 1,  # Use next port for HTTPS
+            log_level="info",
+            ssl_keyfile=ssl_keyfile,
+            ssl_certfile=ssl_certfile
+        )
+        
+        # Create and start both servers
+        http_server = uvicorn.Server(http_conf)
+        https_server = uvicorn.Server(https_conf)
+        
+        # Run both servers concurrently
+        await asyncio.gather(
+            http_server.serve(),
+            https_server.serve()
+        )
     except Exception as e:
         logger.error(f"Failed to start server: {str(e)}")
         sys.exit(1)
