@@ -1,4 +1,5 @@
 ## poe-to-gpt
+
 A converter that transforms POE's API token into OpenAI's API format, enabling other applications that depend on OpenAI API to use POE's API.
 
 This tool converts API keys provided by the Poe official website into compatible OpenAI API keys. It allows Poe API keys to be used with tools that rely on OpenAI API keys. The main reason for developing this tool is to provide convenience and stability for users in mainland China, who find it inconvenient to subscribe to and recharge OpenAI API.
@@ -41,7 +42,9 @@ python app.py
 ```
 
 #### Docker (Recommended)
+
 ##### Method 1: Use the pre-built Docker image from this repository
+
 ```
 # Download the .env.example and docker-compose.yml files to the specified directory, for example: /usr/local/poe-to-gpt
 mkdir /usr/local/poe-to-gpt
@@ -54,7 +57,9 @@ vim .env
 # Start the container, running by default on port 3700
 docker-compose up -d
 ```
+
 ##### Method 2: Build the Docker image yourself
+
 ```
 git clone https://github.com/formzs/poe-to-gpt.git
 cd poe-to-gpt/
@@ -70,15 +75,20 @@ docker compose -f docker-compose-build.yml up -d --build
 Please refer to [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create) for more details on how to use the ChatGPT API.
 
 Simply replace `https://api.openai.com` with `http://localhost:3700` in your code to start using it.
+
 > Note: Make sure to input your custom API key (corresponding to the `ACCESS_TOKENS` field in `.env`)
 
 Supported routes:
+
+- /v1/completions
+- /completions
 - /chat/completions
 - /v1/chat/completions
 - /models
 - /v1/models
 
 ## Supported Model Parameters (The bot name on the POE marketplace can be changed by modifying the .env environment variable file)
+
 - GPT-4o
 - GPT-4o-Mini
 - GPT-3.5-Turbo
@@ -89,6 +99,13 @@ Supported routes:
 - Deepseek-v3-T
 - DALL-E-3
 
+## Support convertion of tool call infomration to chat-base (Experiemental)
+
+In coming Json with `tools` are converted into system prompt that will inform the model the availability of these tools. When the model decides to use the tool, it will output a tool call json that contains the tool name and the parameters to run the tool. This design follows the API impelmentation of "Continue".
+
+Currently, the call from "Continue" extension to edit files are not working because of the characters that might need complex escape to be in a json string. 
+
 ## Acknowledgments
+
 - https://github.com/juzeon/poe-openai-proxy
 - https://developer.poe.com/server-bots/accessing-other-bots-on-poe
